@@ -1,12 +1,22 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:zini_pay/constants/urls.dart';
 
 class HomeController extends GetxController {
-  RxBool isSyncing = false.obs; // Observable for sync status
+  RxBool isSyncing = false.obs;
+  RxList<dynamic> messages = <dynamic>[].obs;
+  final FlutterLocalNotificationsPlugin notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  @override
+  void onInit() {
+    super.onInit();
+    _notifyConfig();
+  }
 
   void backgroundSync() async {
     if (isSyncing.value) {
@@ -33,7 +43,7 @@ class HomeController extends GetxController {
       };
 
       final response = await http.post(
-        Uri.parse(Urls.smsGetUrl),
+        Uri.parse(Urls.smsUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(smsData),
       );
@@ -42,6 +52,11 @@ class HomeController extends GetxController {
       if (response.statusCode == 200) {
         var decodedResponse = jsonDecode(response.body);
         if (decodedResponse['success'] == true) {
+          messages.add({
+            "message": smsData["message"],
+            "from": smsData["from"],
+            "timestamp": smsData["timestamp"],
+          });
           return true;
         } else {
           return false;
@@ -53,5 +68,30 @@ class HomeController extends GetxController {
       log('Error syncing SMS: $e');
       return false;
     }
+  }
+
+  Future<void> _notifyConfig() async {
+    AndroidInitializationSettings androidInitializationSettings =
+        const AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: androidInitializationSettings);
+
+    await notificationsPlugin.initialize(initializationSettings);
+  }
+
+  Future<void> notifyUser(String msg) async {
+    const AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails('Sync', 'SMS Sync Background',
+            showWhen: false,
+            importance: Importance.max,
+            priority: Priority.high,
+            ongoing: true);
+
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidNotificationDetails);
+
+    await notificationsPlugin.show(
+        0, 'Syncing', msg, notificationDetails); // payload didn't used
   }
 }

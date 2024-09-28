@@ -28,16 +28,18 @@ class _LoginPageState extends State<LoginPage> {
           statusBarIconBrightness: Brightness.dark,
         ),
       ),
-      body: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(ImagePath.loginImage),
-            _buildLoginText(),
-            _buildTextFieldSection()
-          ],
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(ImagePath.loginImage),
+              _buildLoginText(),
+              _buildTextFieldSection()
+            ],
+          ),
         ),
       ),
     );

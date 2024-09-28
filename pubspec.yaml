@@ -20,6 +20,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.6.6
   http: ^1.2.2
+  workmanager:
+  shared_preferences:
+  flutter_local_notifications: ^17.2.3
+
+
 
 dev_dependencies:
   flutter_test:
